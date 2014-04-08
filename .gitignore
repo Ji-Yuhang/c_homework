@@ -4,6 +4,9 @@
 *.obj
 *.elf
 
+#Vim files
+*.swp
+
 # Libraries
 *.lib
 *.a
