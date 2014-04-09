@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 struct information{
-    long id;
+    long int id;
     char name[200];
     char type[200];
     double price;
@@ -32,11 +32,11 @@ void show_help()
 
 void insert_information()
 {
+    long int id = 0;
+    char id_char[200];
     printf("\nNow Insert a New Data of Devcie.\n");
     printf("Plase Enter ID, only numeral support, example: \"123456\"\n");
     printf(">>>>");
-    long id = 0;
-    char id_char[200];
     fgets(id_char, 200, stdin);
     id = atol(id_char);
     printf("You Typed %ld\n", id);
@@ -55,22 +55,35 @@ void modify_information()
 }
 void select_operator(char operator[100])
 {
-    int compare_help = strcmp(operator,"help\n");
+    int compare_help = -1;
+    int compare_insert = -1;
+    int compare_list = -1;
+    int compare_delete = -1;
+    int compare_search = -1;
+    int compare_modify = -1;
+
+/*1.*/
+    compare_help = strcmp(operator,"help\n");
     if (0 == compare_help)
         show_help();
-    int compare_insert = strcmp(operator, "v\n");
+/*2.*/
+    compare_insert = strcmp(operator, "v\n");
     if (0 == compare_insert)
         insert_information();
-    int compare_list = strcmp(operator, "l\n");
+/*3.*/
+    compare_list = strcmp(operator, "l\n");
     if (0 == compare_list)
         list_information();
-    int compare_delete = strcmp(operator, "d\n");
+/*4.*/
+    compare_delete = strcmp(operator, "d\n");
     if (0 == compare_delete)
-        delete_information();      
-    int compare_search = strcmp(operator, "s\n");
+        delete_information();
+/*5.*/
+    compare_search = strcmp(operator, "s\n");
     if (0 == compare_search)
         search_information();
-    int compare_modify = strcmp(operator, "m\n");
+/*6.*/
+    compare_modify = strcmp(operator, "m\n");
     if (0 == compare_modify)
         modify_information();
 }
