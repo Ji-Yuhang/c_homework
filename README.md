@@ -7,8 +7,6 @@ c_homework
 
 作者：<742654192@qq.com>, <yuhang.silence@gmail.com>
 
-个人网站：<http://jiyuhang.sinaapp.com>
-
 ====================
 
 ####主要内容——开发一个实验设备管理系统，基本设备信息包括：
