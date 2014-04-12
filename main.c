@@ -35,7 +35,7 @@ void show_help()
     printf("This is Help Page!\n");
     printf("Type \"q\", Quit \n");
     printf("Type \"v\", Insert Data of Device \n");
-    printf("Type \"l\", Show All Data, default order by ID\n");
+    printf("Type \"l\", Show All Data, default order by time\n");
     printf("Type \"lid\", Show Data order by Id\n");
     printf("Type \"lname\", Show Data order by Name\n");
     printf("Type \"lprice\", Show Data order by Price\n");
@@ -240,6 +240,18 @@ void list_information(struct info_list * list_head)
         list_temp = list_temp->next;
     }
 }
+
+void list_information_order(struct info_list * list_head, const char* which)
+{
+    //复制链表, 排序后输出
+    if (0 == strcmp(which, "id")) {
+        ;
+    } else if (0 == strcmp(which, "name")) {
+        ;
+    } else if (0 == strcmp(which, "price")) {
+        ;
+    }
+}
 void delete_information()
 {
 }
@@ -257,7 +269,9 @@ void select_operator(char operator[100], struct info_list * list_head)
     int compare_delete = -1;
     int compare_search = -1;
     int compare_modify = -1;
-    
+    int compare_list_order_id = -1;
+    int compare_list_order_name = -1;
+    int compare_list_order_price = -1;
     /*1.*/
     compare_help = strcmp(operator,"help\n");
     if (0 == compare_help)
@@ -270,6 +284,15 @@ void select_operator(char operator[100], struct info_list * list_head)
     compare_list = strcmp(operator, "l\n");
     if (0 == compare_list)
         list_information(list_head);
+    compare_list_order_id = strcmp(operator, "l\n");
+    if (0 == compare_list_order_id)
+        list_information_order(list_head, "id");
+    compare_list_order_name = strcmp(operator, "l\n");
+    if (0 == compare_list_order_name)
+        list_information_order(list_head, "name");
+    compare_list_order_price = strcmp(operator, "l\n");
+    if (0 == compare_list_order_price)
+        list_information_order(list_head, "price");
     /*4.*/
     compare_delete = strcmp(operator, "d\n");
     if (0 == compare_delete)
@@ -282,6 +305,23 @@ void select_operator(char operator[100], struct info_list * list_head)
     compare_modify = strcmp(operator, "m\n");
     if (0 == compare_modify)
         modify_information();
+}
+void freeMem(struct info_list* list_head)
+{
+    struct info_list * list_temp = list_head;
+    struct info_list * list_next = NULL;
+    while (list_temp) {
+        if (list_temp->node) {
+            free(list_temp->node);
+        }
+        if (list_temp->next) {
+            list_next = list_temp->next;
+            free(list_temp);
+            list_temp = list_next;
+        } else {
+            break;
+        }
+    }
 }
 int main(int argc, char** argv)
 {
@@ -304,7 +344,7 @@ int main(int argc, char** argv)
         select_operator(operator, list_head);
         
     } while (strcmp(operator, "q\n") != 0);
-    
+    freeMem(list_head);
     return 0;
 }
 
