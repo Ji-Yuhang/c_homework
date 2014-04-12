@@ -6,6 +6,10 @@
 
 #Vim files
 *.swp
+tags
+*.out
+*.dSYM
+record.txt
 
 # Libraries
 *.lib
