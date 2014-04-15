@@ -243,7 +243,6 @@ void list_information(struct Info_list * list_head)
 
 void list_information_order(struct Info_list * list_head, const char* which)
 {
-    //复制链表指针，将其排序后输出
     struct Info_list * list_temp = list_head;
     struct Info_list * swap_temp = NULL;
     struct SortHelp
