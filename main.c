@@ -10,6 +10,7 @@
 
 const char* file_name = "record.txt";
 
+/* 信息结构体 */
 struct Information {
     long int id;
     char name[200];
@@ -20,30 +21,62 @@ struct Information {
     char comment[400];
 };
 
+/* 链表结构体 */
 struct Info_list {
     struct Information * node;
     struct Info_list * next;
 };
 
+/* 结构体字段枚举值 */
+enum InfoType{
+    NONE = 0,
+    ID = 1,
+    NAME = 2,
+    TYPE = 3,
+    PRICE = 4,
+    NUMBER = 5,
+    COMPANY = 6,
+    COMMENT = 7,
+    ALL = 8
+};
+
+/* 简单地去掉字符串最后一位换行符 */
 void trimmed(char c[])
 {
     if (c[strlen(c) - 1] == '\n')
         c[strlen(c) - 1] = '\0';
 }
+
+/* 显示所有支持的命令 */
 void show_help()
 {
     printf("This is Help Page!\n");
     printf("Type \"q\", Quit \n");
     printf("Type \"i\", Insert Data of Device \n");
+
     printf("Type \"l\", Show All Data, default order by time\n");
     printf("Type \"lid\", Show Data order by Id\n");
     printf("Type \"lname\", Show Data order by Name\n");
+    printf("Type \"ltype\", Show Data order by Type\n");
     printf("Type \"lprice\", Show Data order by Price\n");
     printf("Type \"lnumber\", Show Data order by Number\n");
+    printf("Type \"lcompany\", Show Data order by Company\n");
+    printf("Type \"lcomment\", Show Data order by Comment\n");
+    
+    printf("Type \"s\", Search Data, default support fuzzy search\n");
+    printf("Type \"sid\", Search Data by Id\n");
+    printf("Type \"sname\", Search Data by Name\n");
+    printf("Type \"stype\", Search Data by Type\n");
+    printf("Type \"sprice\", Search Data by Price\n");
+    printf("Type \"snumber\", Search Data by Number\n");
+    printf("Type \"scompany\", Search Data by Company\n");
+    printf("Type \"scomment\", Search Data by Comment\n");
+    
     printf("\n");
     
 }
 
+/* 向文件末尾添加结构体信息 */
 int write_to_file(struct Information* info)
 {
     FILE *file;
@@ -66,6 +99,7 @@ int write_to_file(struct Information* info)
     return 1;
 }
 
+/* 读取文件所有数据，并保存到链表当中 */
 struct Info_list* read_from_file(struct Info_list* list_head)
 {
     FILE *file;
@@ -75,7 +109,6 @@ struct Info_list* read_from_file(struct Info_list* list_head)
     
     char str[400];
     int flag = 0;
-    
     
     file = fopen(file_name, "r");
     if(!file) {
@@ -92,7 +125,6 @@ struct Info_list* read_from_file(struct Info_list* list_head)
         
         if (flag > 7) {
             flag = 1;
-            
         }
         
         switch(flag)
@@ -143,9 +175,9 @@ struct Info_list* read_from_file(struct Info_list* list_head)
     
     fclose(file);
     return list_head;
-    
 }
 
+/* 执行插入数据命令 */
 void insert_information(struct Info_list *list_head)
 {
     char id_char[200];
@@ -223,6 +255,8 @@ void insert_information(struct Info_list *list_head)
     trimmed(info->comment);
     write_to_file(info);
 }
+
+/* 按插入的日期显示所有数据 */
 void list_information(struct Info_list * list_head)
 {
     struct Info_list *list_temp = list_head;
@@ -241,6 +275,7 @@ void list_information(struct Info_list * list_head)
     }
 }
 
+/* 按相应的排序方法显示数据 */
 void list_information_order(struct Info_list * list_head, const char* which)
 {
     struct Info_list * list_temp = list_head;
@@ -261,20 +296,27 @@ void list_information_order(struct Info_list * list_head, const char* which)
     int sort_num = 0;
     int i = 0;
     int j = 0;
-    /*copy Info_list to SortHelp*/
+    
+    /* 新建链表保存原链表的信息 */
+    /* copy Info_list to SortHelp */
     while(list_temp && list_temp->node != NULL ) {
+        
         sort_one = (struct SortHelp *)malloc(sizeof(struct SortHelp));
         if (NULL == sort_one) {
             printf("\nError!    Cannot malloc memory\n");
-            /* Todo:
-             * Free linked SortHelp
-             **/
-            
+            /* 如果申请内存失败，在函数返回前需要释放已申请的内存，防止内存泄露 */
+            sort_iter = sort_head;
+            while (sort_iter) {
+                sort_temp = sort_iter;
+                sort_iter = sort_iter->next;
+                free(sort_temp);
+            }
             return ;
         }
         sort_one->node = list_temp;
         sort_one->flag = 0;    /* 0 meaning nothing*/
         sort_one->next = NULL;
+        
         if (NULL == sort_head) {
             sort_head = sort_one;
             sort_iter = sort_head;
@@ -287,15 +329,19 @@ void list_information_order(struct Info_list * list_head, const char* which)
         ++sort_num;
     }
     
+    /* 冒泡排序 */
     for (i = sort_num; i > 0; --i) {
         sort_iter = sort_head;
         
-        /*jump have sort node*/
+        /* 跳过前面的已经排过序的结点 */
+        /* jump have sort node */
         for (j = 0; j < sort_num - i; ++j) {
             sort_iter = sort_iter->next;
         }
         sort_temp = sort_iter;
-        /*selet min node, and move to head in linked list*/
+        
+        /* 按照一定规则，找到数值最小的结点 */
+        /* selet min node, and move to head in linked list */
         sort_min = sort_iter;
         while(sort_iter) {
             if (0 == sort_iter->flag) {
@@ -308,6 +354,15 @@ void list_information_order(struct Info_list * list_head, const char* which)
                 } else if (0 == strcmp(which, "price")) {
                     if (sort_iter->node->node->price < sort_min->node->node->price)
                         sort_min = sort_iter;
+                } else if (0 == strcmp(which, "type")) {
+                    if (strcmp(sort_iter->node->node->type , sort_min->node->node->type) < 0)
+                        sort_min = sort_iter;
+                } else if (0 == strcmp(which, "company")) {
+                    if (strcmp(sort_iter->node->node->company , sort_min->node->node->company) < 0)
+                        sort_min = sort_iter;
+                } else if (0 == strcmp(which, "comment")) {
+                    if (strcmp(sort_iter->node->node->comment , sort_min->node->node->comment) < 0)
+                        sort_min = sort_iter;
                 } else if (0 == strcmp(which, "number")) {
                     if (sort_iter->node->node->number < sort_min->node->node->number)
                         sort_min = sort_iter;
@@ -317,11 +372,14 @@ void list_information_order(struct Info_list * list_head, const char* which)
             sort_iter = sort_iter->next;
         }
         (sort_min->flag)++;
+        
+        /* 将找到的最小结点与第一个无序的结点交换位置 */
         swap_temp = sort_min->node;
         sort_min->node = sort_temp->node;
         sort_temp->node = swap_temp;
     }
-    
+
+    /* 将排序后的链表中得数据输出，并释放内存，防止内存泄露 */
     sort_iter = sort_head;
     while(sort_iter) {
         info_temp = sort_iter->node->node;
@@ -341,61 +399,154 @@ void list_information_order(struct Info_list * list_head, const char* which)
 void delete_information()
 {
 }
-void search_information()
+
+
+/* 查找数据 */
+void search_information(struct Info_list * list_head, enum InfoType type)
 {
+    enum HaveInfo {
+        HAVE = 1,
+        UNHAVE = 2
+    };
+    struct Info_list * list_iter = list_head;
+    char condition[100];
+    char char_id[100];
+    char char_price[100];
+    char char_number[100];
+    struct Information * info = NULL;
+    enum HaveInfo is_have = UNHAVE;
+    if (ALL == type) {
+        printf("Enter your condition below. (support fuzzy search) \n>>>>");
+    } else
+        printf("Enter your condition below. \n>>>>");
+    fgets(condition, 100, stdin);
+    trimmed(condition);
+    while (list_iter && list_iter->node) {
+        info = list_iter->node;
+        is_have = UNHAVE;
+        sprintf(char_id, "%ld", info->id);
+        sprintf(char_price, "%f", info->price);
+        sprintf(char_number, "%u", info->number);
+        switch (type) {
+            case ALL:
+                if( strstr(char_id, condition)
+                   || strstr(info->name, condition)
+                   || strstr(info->type, condition)
+                   || strstr(char_price, condition)
+                   || strstr(char_number, condition)
+                   || strstr(info->company, condition)
+                   || strstr(info->comment, condition)
+                   )
+                    is_have = HAVE;
+                break;
+            case ID:
+                if( strstr(char_id, condition))
+                    is_have = HAVE;
+                break;
+            case NAME:
+                if( strstr(info->name, condition))
+                    is_have = HAVE;
+                break;
+            case TYPE:
+                if( strstr(info->type, condition))
+                    is_have = HAVE;
+                break;
+            case PRICE:
+                if( strstr(char_price, condition))
+                    is_have = HAVE;
+                break;
+            case NUMBER:
+                if( strstr(char_number, condition))
+                    is_have = HAVE;
+                break;
+            case COMPANY:
+                if( strstr(info->company, condition))
+                    is_have = HAVE;
+                break;
+            case COMMENT:
+                if( strstr(info->comment, condition))
+                    is_have = HAVE;
+                break;
+                
+            default:
+                is_have = UNHAVE;
+                break;
+        }
+        if( HAVE == is_have) {
+            printf("\n ID: %ld", info->id);
+            printf("\t Name: %s", info->name);
+            printf("\t Type %s", info->type);
+            printf("\t Price: %.2f", info->price);
+            printf("\t Number: %u", info->number);
+            printf("\t Company: %s", info->company);
+            printf("\t Comment: %s\n", info->comment);
+        }
+        list_iter = list_iter->next;
+    }
+    
 }
+
+
 void modify_information()
 {
 }
+
+/* 分配命令，并执行 */
 void select_operator(char operator[100], struct Info_list * list_head)
 {
-    int compare_help = -1;
-    int compare_insert = -1;
-    int compare_list = -1;
-    int compare_delete = -1;
-    int compare_search = -1;
-    int compare_modify = -1;
-    int compare_list_order_id = -1;
-    int compare_list_order_name = -1;
-    int compare_list_order_price = -1;
-    int compare_list_order_number = -1;
-    /*1.*/
-    compare_help = strcmp(operator,"help\n");
-    if (0 == compare_help)
+    /* 显示帮助页面 */
+    if (0 == strcmp(operator,"help"))
         show_help();
-    /*2.*/
-    compare_insert = strcmp(operator, "i\n");
-    if (0 == compare_insert)
+    
+    /* 插入新数据 */
+    else if (0 == strcmp(operator, "i"))
         insert_information(list_head);
-    /*3.*/
-    compare_list = strcmp(operator, "l\n");
-    if (0 == compare_list)
+    
+    /* 显示数据，按插入时间输出，或按某个字段排序后输出 */
+    else if (0 == strcmp(operator, "l"))
         list_information(list_head);
-    compare_list_order_id = strcmp(operator, "lid\n");
-    if (0 == compare_list_order_id)
+    else if (0 == strcmp(operator, "lid"))
         list_information_order(list_head, "id");
-    compare_list_order_name = strcmp(operator, "lname\n");
-    if (0 == compare_list_order_name)
+    else if (0 == strcmp(operator, "lname"))
         list_information_order(list_head, "name");
-    compare_list_order_price = strcmp(operator, "lprice\n");
-    if (0 == compare_list_order_price)
+    else if (0 == strcmp(operator, "lprice"))
         list_information_order(list_head, "price");
-    compare_list_order_number = strcmp(operator, "lnumber\n");
-    if (0 == compare_list_order_number)
+    else if (0 == strcmp(operator, "lnumber"))
         list_information_order(list_head, "number");
+    else if (0 == strcmp(operator, "ltype"))
+        list_information_order(list_head, "type");
+    else if (0 == strcmp(operator, "lcompany"))
+        list_information_order(list_head, "company");
+    else if (0 == strcmp(operator, "lcomment"))
+        list_information_order(list_head, "comment");
     /*4.*/
-    compare_delete = strcmp(operator, "d\n");
-    if (0 == compare_delete)
+    else if (0 == strcmp(operator, "d"))
         delete_information();
-    /*5.*/
-    compare_search = strcmp(operator, "s\n");
-    if (0 == compare_search)
-        search_information();
+    
+    /* 查找数据，全文模糊查找或按字段模糊查找*/
+    else if (0 == strcmp(operator, "s"))
+        search_information(list_head , ALL);
+    else if (0 ==  strcmp(operator, "sid"))
+        search_information(list_head, ID);
+    else if (0 ==  strcmp(operator, "sname"))
+        search_information(list_head, NAME);
+    else if (0 ==  strcmp(operator, "sprice"))
+        search_information(list_head, PRICE);
+    else if (0 ==  strcmp(operator, "stype"))
+        search_information(list_head, TYPE);
+    else if (0 ==  strcmp(operator, "snumber"))
+        search_information(list_head, NUMBER);
+    else if (0 ==  strcmp(operator, "scompany"))
+        search_information(list_head, COMPANY);
+    else if (0 ==  strcmp(operator, "scomment"))
+        search_information(list_head, COMMENT);
+    
     /*6.*/
-    compare_modify = strcmp(operator, "m\n");
-    if (0 == compare_modify)
+    else if (0 == strcmp(operator, "m"))
         modify_information();
 }
+
+/* 释放链表申请的内存 */
 void freeMem(struct Info_list* list_head)
 {
     struct Info_list * list_temp = list_head;
@@ -413,17 +564,24 @@ void freeMem(struct Info_list* list_head)
         }
     }
 }
+
 int main(int argc, char** argv)
 {
     char operator[100];
+    
+    /* 给链表的头结点分配内存，并初始化数据为NULL*/
     struct Info_list * list_head = (struct Info_list*)malloc(sizeof(struct Info_list));
     if (NULL == list_head) {
         printf("\nError!    Cannot malloc memory\n");
         return 0;
     }
     list_head->next = NULL;
-    list_head->node = NULL;;
+    list_head->node = NULL;
+    
+    /* 从保存的文件读取数据，并将数据保存到链表当中 */
     read_from_file(list_head);
+    
+    /* 循环执行用户输入的指令，直到输入退出指令 "q"。*/
     do{
         printf("\n________________________________________________________________________\n");
         printf("Plese Select Your Operator!    ");
@@ -431,9 +589,12 @@ int main(int argc, char** argv)
         printf("------------------------------------------------------------------------\n");
         printf(">>>>");
         fgets(operator, 100, stdin);
+        trimmed(operator);
         select_operator(operator, list_head);
         
-    } while (strcmp(operator, "q\n") != 0);
+    } while (strcmp(operator, "q") != 0);
+    
+    /* 释放链表所申请的内存，防止内存泄露 */
     freeMem(list_head);
     return 0;
 }
