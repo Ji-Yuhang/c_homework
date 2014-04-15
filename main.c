@@ -197,7 +197,6 @@ void insert_information(struct info_list *list_head)
     trimmed(info->type);
     printf("You Typed %s\n", info->type);
     
-    
     printf("Plase Enter Price, only numeral support, example: \"123.456\"\n");
     printf(">>>>");
     fgets(price_char, 200, stdin);
