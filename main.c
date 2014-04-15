@@ -34,11 +34,12 @@ void show_help()
 {
     printf("This is Help Page!\n");
     printf("Type \"q\", Quit \n");
-    printf("Type \"v\", Insert Data of Device \n");
+    printf("Type \"i\", Insert Data of Device \n");
     printf("Type \"l\", Show All Data, default order by time\n");
     printf("Type \"lid\", Show Data order by Id\n");
     printf("Type \"lname\", Show Data order by Name\n");
     printf("Type \"lprice\", Show Data order by Price\n");
+    printf("Type \"lnumber\", Show Data order by Number\n");
     printf("\n");
     
 }
@@ -308,7 +309,11 @@ void list_information_order(struct Info_list * list_head, const char* which)
                 } else if (0 == strcmp(which, "price")) {
                     if (sort_iter->node->node->price < sort_min->node->node->price)
                         sort_min = sort_iter;
+                } else if (0 == strcmp(which, "number")) {
+                    if (sort_iter->node->node->number < sort_min->node->node->number)
+                        sort_min = sort_iter;
                 }
+
             }
             sort_iter = sort_iter->next;
         }
@@ -321,10 +326,10 @@ void list_information_order(struct Info_list * list_head, const char* which)
     sort_iter = sort_head;
     while(sort_iter) {
         info_temp = sort_iter->node->node;
-        printf("\n ID: %ld", info_temp->id);
+        printf("\n id: %ld", info_temp->id);
         printf("\t name: %s", info_temp->name);
-        printf("\t Type: %s", info_temp->type);
-        printf("\t Price: %.2f", info_temp->price);
+        printf("\t type: %s", info_temp->type);
+        printf("\t price: %.2f", info_temp->price);
         printf("\t Number: %u", info_temp->number);
         printf("\n  Company: %s", info_temp->company);
         printf("  Comment: %s\n", info_temp->comment);
@@ -354,12 +359,13 @@ void select_operator(char operator[100], struct Info_list * list_head)
     int compare_list_order_id = -1;
     int compare_list_order_name = -1;
     int compare_list_order_price = -1;
+    int compare_list_order_number = -1;
     /*1.*/
     compare_help = strcmp(operator,"help\n");
     if (0 == compare_help)
         show_help();
     /*2.*/
-    compare_insert = strcmp(operator, "v\n");
+    compare_insert = strcmp(operator, "i\n");
     if (0 == compare_insert)
         insert_information(list_head);
     /*3.*/
@@ -375,6 +381,9 @@ void select_operator(char operator[100], struct Info_list * list_head)
     compare_list_order_price = strcmp(operator, "lprice\n");
     if (0 == compare_list_order_price)
         list_information_order(list_head, "price");
+    compare_list_order_number = strcmp(operator, "lnumber\n");
+    if (0 == compare_list_order_number)
+        list_information_order(list_head, "number");
     /*4.*/
     compare_delete = strcmp(operator, "d\n");
     if (0 == compare_delete)
