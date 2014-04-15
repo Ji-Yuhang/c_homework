@@ -10,7 +10,7 @@
 
 const char* file_name = "record.txt";
 
-struct information {
+struct Information {
     long int id;
     char name[200];
     char type[200];
@@ -20,9 +20,9 @@ struct information {
     char comment[400];
 };
 
-struct info_list {
-    struct information * node;
-    struct info_list * next;
+struct Info_list {
+    struct Information * node;
+    struct Info_list * next;
 };
 
 void trimmed(char c[])
@@ -43,7 +43,7 @@ void show_help()
     
 }
 
-int write_to_file(struct information* info)
+int write_to_file(struct Information* info)
 {
     FILE *file;
     file = fopen(file_name, "a");
@@ -65,12 +65,12 @@ int write_to_file(struct information* info)
     return 1;
 }
 
-struct info_list* read_from_file(struct info_list* list_head)
+struct Info_list* read_from_file(struct Info_list* list_head)
 {
     FILE *file;
-    struct information *info = NULL;
-    struct info_list *list_next = NULL;
-    struct info_list *list_temp = NULL;
+    struct Information *info = NULL;
+    struct Info_list *list_next = NULL;
+    struct Info_list *list_temp = NULL;
     
     char str[400];
     int flag = 0;
@@ -99,8 +99,8 @@ struct info_list* read_from_file(struct info_list* list_head)
             case 0:
                 break;
             case 1:
-                list_next = (struct info_list*)malloc(sizeof(struct info_list));
-                info = (struct information*)malloc(sizeof(struct information));
+                list_next = (struct Info_list*)malloc(sizeof(struct Info_list));
+                info = (struct Information*)malloc(sizeof(struct Information));
                 if (NULL == info || NULL == list_head) {
                     printf("\nError!    Cannot malloc memory\n");
                     return NULL;
@@ -145,17 +145,17 @@ struct info_list* read_from_file(struct info_list* list_head)
     
 }
 
-void insert_information(struct info_list *list_head)
+void insert_information(struct Info_list *list_head)
 {
     char id_char[200];
     char price_char[200];
     char number_char[200];
-    struct information *info = NULL;
-    struct info_list* list_next = NULL;
-    struct info_list* list_temp = NULL;
+    struct Information *info = NULL;
+    struct Info_list* list_next = NULL;
+    struct Info_list* list_temp = NULL;
     
     if (!list_head) {
-        list_head = (struct info_list*)malloc(sizeof(struct info_list));
+        list_head = (struct Info_list*)malloc(sizeof(struct Info_list));
         if (NULL == list_head) {
             printf("\nError!    Cannot malloc memory\n");
             return ;
@@ -167,8 +167,8 @@ void insert_information(struct info_list *list_head)
     while (list_temp != NULL && list_temp->node != NULL)
         list_temp = list_temp->next;
     
-    list_next = (struct info_list*)malloc(sizeof(struct info_list));
-    info = (struct information*)malloc(sizeof(struct information));
+    list_next = (struct Info_list*)malloc(sizeof(struct Info_list));
+    info = (struct Information*)malloc(sizeof(struct Information));
     if (NULL == info || NULL == list_next) {
         printf("\nError!    Cannot malloc memory\n");
         return ;
@@ -222,34 +222,117 @@ void insert_information(struct info_list *list_head)
     trimmed(info->comment);
     write_to_file(info);
 }
-void list_information(struct info_list * list_head)
+void list_information(struct Info_list * list_head)
 {
-    struct info_list *list_temp = list_head;
-    struct information *temp = NULL;
+    struct Info_list *list_temp = list_head;
+    struct Information *temp = NULL;
     while (list_temp != NULL && list_temp->node != NULL) {
         temp = list_temp->node;
         printf("\n ID: %ld", temp->id);
         printf("\t Name: %s", temp->name);
         printf("\t Type %s", temp->type);
-        printf("\t Price: %f", temp->price);
+        printf("\t Price: %.2f", temp->price);
         printf("\t Number: %u", temp->number);
         printf("\t Company: %s", temp->company);
-        printf("\t Comment: %s", temp->comment);
+        printf("\t Comment: %s\n", temp->comment);
         
         list_temp = list_temp->next;
     }
 }
 
-void list_information_order(struct info_list * list_head, const char* which)
+void list_information_order(struct Info_list * list_head, const char* which)
 {
-    //复制链表, 排序后输出
-    if (0 == strcmp(which, "id")) {
-        ;
-    } else if (0 == strcmp(which, "name")) {
-        ;
-    } else if (0 == strcmp(which, "price")) {
-        ;
+    //复制链表指针，将其排序后输出
+    struct Info_list * list_temp = list_head;
+    struct Info_list * swap_temp = NULL;
+    struct SortHelp
+    {
+        struct Info_list* node;
+        int flag;
+        struct SortHelp *next;
+    };
+    struct SortHelp *sort_head = NULL;
+    struct SortHelp *sort_iter = NULL;
+    struct SortHelp *sort_one = NULL;
+    struct SortHelp *sort_min = NULL;
+    struct SortHelp *sort_temp = NULL;
+    
+    struct Information * info_temp = NULL;
+    int sort_num = 0;
+    int i = 0;
+    int j = 0;
+    /*copy Info_list to SortHelp*/
+    while(list_temp && list_temp->node != NULL ) {
+        sort_one = (struct SortHelp *)malloc(sizeof(struct SortHelp));
+        if (NULL == sort_one) {
+            printf("\nError!    Cannot malloc memory\n");
+            /* Todo:
+             * Free linked SortHelp
+             **/
+            
+            return ;
+        }
+        sort_one->node = list_temp;
+        sort_one->flag = 0;    /* 0 meaning nothing*/
+        sort_one->next = NULL;
+        if (NULL == sort_head) {
+            sort_head = sort_one;
+            sort_iter = sort_head;
+        } else {
+            sort_iter->next = sort_one;
+            sort_iter = sort_iter->next;
+        }
+        
+        list_temp = list_temp->next;
+        ++sort_num;
     }
+    
+    for (i = sort_num; i > 0; --i) {
+        sort_iter = sort_head;
+        
+        /*jump have sort node*/
+        for (j = 0; j < sort_num - i; ++j) {
+            sort_iter = sort_iter->next;
+        }
+        sort_temp = sort_iter;
+        /*selet min node, and move to head in linked list*/
+        sort_min = sort_iter;
+        while(sort_iter) {
+            if (0 == sort_iter->flag) {
+                if (0 == strcmp(which, "id")) {
+                    if (sort_iter->node->node->id < sort_min->node->node->id)
+                        sort_min = sort_iter;
+                } else if (0 == strcmp(which, "name")) {
+                    if (strcmp(sort_iter->node->node->name , sort_min->node->node->name) < 0)
+                        sort_min = sort_iter;
+                } else if (0 == strcmp(which, "price")) {
+                    if (sort_iter->node->node->price < sort_min->node->node->price)
+                        sort_min = sort_iter;
+                }
+            }
+            sort_iter = sort_iter->next;
+        }
+        (sort_min->flag)++;
+        swap_temp = sort_min->node;
+        sort_min->node = sort_temp->node;
+        sort_temp->node = swap_temp;
+    }
+    
+    sort_iter = sort_head;
+    while(sort_iter) {
+        info_temp = sort_iter->node->node;
+        printf("\n ID: %ld", info_temp->id);
+        printf("\t name: %s", info_temp->name);
+        printf("\t Type: %s", info_temp->type);
+        printf("\t Price: %.2f", info_temp->price);
+        printf("\t Number: %u", info_temp->number);
+        printf("\n  Company: %s", info_temp->company);
+        printf("  Comment: %s\n", info_temp->comment);
+        sort_temp = sort_iter;
+        sort_iter = sort_iter->next;
+        free(sort_temp);
+    }
+    
 }
 void delete_information()
 {
@@ -260,7 +343,7 @@ void search_information()
 void modify_information()
 {
 }
-void select_operator(char operator[100], struct info_list * list_head)
+void select_operator(char operator[100], struct Info_list * list_head)
 {
     int compare_help = -1;
     int compare_insert = -1;
@@ -283,13 +366,13 @@ void select_operator(char operator[100], struct info_list * list_head)
     compare_list = strcmp(operator, "l\n");
     if (0 == compare_list)
         list_information(list_head);
-    compare_list_order_id = strcmp(operator, "l\n");
+    compare_list_order_id = strcmp(operator, "lid\n");
     if (0 == compare_list_order_id)
         list_information_order(list_head, "id");
-    compare_list_order_name = strcmp(operator, "l\n");
+    compare_list_order_name = strcmp(operator, "lname\n");
     if (0 == compare_list_order_name)
         list_information_order(list_head, "name");
-    compare_list_order_price = strcmp(operator, "l\n");
+    compare_list_order_price = strcmp(operator, "lprice\n");
     if (0 == compare_list_order_price)
         list_information_order(list_head, "price");
     /*4.*/
@@ -305,10 +388,10 @@ void select_operator(char operator[100], struct info_list * list_head)
     if (0 == compare_modify)
         modify_information();
 }
-void freeMem(struct info_list* list_head)
+void freeMem(struct Info_list* list_head)
 {
-    struct info_list * list_temp = list_head;
-    struct info_list * list_next = NULL;
+    struct Info_list * list_temp = list_head;
+    struct Info_list * list_next = NULL;
     while (list_temp) {
         if (list_temp->node) {
             free(list_temp->node);
@@ -325,7 +408,7 @@ void freeMem(struct info_list* list_head)
 int main(int argc, char** argv)
 {
     char operator[100];
-    struct info_list * list_head = (struct info_list*)malloc(sizeof(struct info_list));
+    struct Info_list * list_head = (struct Info_list*)malloc(sizeof(struct Info_list));
     if (NULL == list_head) {
         printf("\nError!    Cannot malloc memory\n");
         return 0;
