@@ -41,11 +41,11 @@ enum InfoType{
 };
 
 /* 去掉字符串两端的空白字符 */
-void trimmed(char * c)
+char* trimmed(char * c)
 {
     char* end = NULL;
     if (!c)
-        return ;
+        return c;
     
     end = c + strlen(c) - 1;
     
@@ -55,6 +55,7 @@ void trimmed(char * c)
     while (*end && isspace(*end)) {
         *end-- = '\0';
     }
+    return c;
 }
 
 /* 显示所有支持的命令 */
@@ -158,7 +159,7 @@ struct Info_list* read_from_file(struct Info_list* list_head)
                 break;
             case 2:
                 strncpy(info->name, str, 200);
-                trimmed(info->name);
+                trimmed(info->name);    /* 这里的trimmed函数没有返回值，意味着只能去掉末尾的空白 */
                 break;
             case 3:
                 strncpy(info->type, str, 200);
@@ -423,6 +424,7 @@ void search_information(struct Info_list * list_head, enum InfoType type)
     char char_id[100];
     char char_price[100];
     char char_number[100];
+    char * trimmed_condition = NULL;
     struct Information * info = NULL;
     enum HaveInfo is_have = UNHAVE;
     if (ALL == type) {
@@ -430,7 +432,7 @@ void search_information(struct Info_list * list_head, enum InfoType type)
     } else
         printf("Enter your condition below. \n>>>>");
     fgets(condition, 100, stdin);
-    trimmed(condition);
+    trimmed_condition = trimmed(condition);
     while (list_iter && list_iter->node) {
         info = list_iter->node;
         is_have = UNHAVE;
@@ -439,42 +441,42 @@ void search_information(struct Info_list * list_head, enum InfoType type)
         sprintf(char_number, "%u", info->number);
         switch (type) {
             case ALL:
-                if( strstr(char_id, condition)
-                   || strstr(info->name, condition)
-                   || strstr(info->type, condition)
-                   || strstr(char_price, condition)
-                   || strstr(char_number, condition)
-                   || strstr(info->company, condition)
-                   || strstr(info->comment, condition)
+                if( strstr(char_id, trimmed_condition)
+                   || strstr(info->name, trimmed_condition)
+                   || strstr(info->type, trimmed_condition)
+                   || strstr(char_price, trimmed_condition)
+                   || strstr(char_number, trimmed_condition)
+                   || strstr(info->company, trimmed_condition)
+                   || strstr(info->comment, trimmed_condition)
                    )
                     is_have = HAVE;
                 break;
             case ID:
-                if( strstr(char_id, condition))
+                if( strstr(char_id, trimmed_condition))
                     is_have = HAVE;
                 break;
             case NAME:
-                if( strstr(info->name, condition))
+                if( strstr(info->name, trimmed_condition))
                     is_have = HAVE;
                 break;
             case TYPE:
-                if( strstr(info->type, condition))
+                if( strstr(info->type, trimmed_condition))
                     is_have = HAVE;
                 break;
             case PRICE:
-                if( strstr(char_price, condition))
+                if( strstr(char_price, trimmed_condition))
                     is_have = HAVE;
                 break;
             case NUMBER:
-                if( strstr(char_number, condition))
+                if( strstr(char_number, trimmed_condition))
                     is_have = HAVE;
                 break;
             case COMPANY:
-                if( strstr(info->company, condition))
+                if( strstr(info->company, trimmed_condition))
                     is_have = HAVE;
                 break;
             case COMMENT:
-                if( strstr(info->comment, condition))
+                if( strstr(info->comment, trimmed_condition))
                     is_have = HAVE;
                 break;
                 
@@ -578,7 +580,7 @@ void freeMem(struct Info_list* list_head)
 int main(int argc, char** argv)
 {
     char operator[100];
-    
+    char * trimmed_operator = NULL;
     /* 给链表的头结点分配内存，并初始化数据为NULL*/
     struct Info_list * list_head = (struct Info_list*)malloc(sizeof(struct Info_list));
     if (NULL == list_head) {
@@ -591,7 +593,7 @@ int main(int argc, char** argv)
     /* 从保存的文件读取数据，并将数据保存到链表当中 */
     read_from_file(list_head);
     
-    /* 循环执行用户输入的指令，直到输入退出指令 "q"。*/
+    /* 循环执行用户输入的指令，直到输入退出指令 "q" */
     do{
         printf("\n________________________________________________________________________\n");
         printf("Plese Select Your Operator!    ");
@@ -599,8 +601,8 @@ int main(int argc, char** argv)
         printf("------------------------------------------------------------------------\n");
         printf(">>>>");
         fgets(operator, 100, stdin);
-        trimmed(operator);
-        select_operator(operator, list_head);
+        trimmed_operator = trimmed(operator);
+        select_operator(trimmed_operator, list_head);
         
     } while (strcmp(operator, "q") != 0);
     
