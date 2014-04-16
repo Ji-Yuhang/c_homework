@@ -44,7 +44,7 @@ enum InfoType{
 char* trimmed(char * c)
 {
     char* end = NULL;
-    if (!c)
+    if (NULL == c)
         return c;
     
     end = c + strlen(c) - 1;
@@ -52,7 +52,7 @@ char* trimmed(char * c)
     while (*c && isspace(*c)) {
         c++;
     }
-    while (*end && isspace(*end)) {
+    while (*end && end >= c && isspace(*end)) {
         *end-- = '\0';
     }
     return c;
