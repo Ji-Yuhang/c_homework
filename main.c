@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <ctype.h>
 const char* file_name = "record.txt";
 
 /* 信息结构体 */
@@ -40,11 +40,21 @@ enum InfoType{
     ALL = 8
 };
 
-/* 简单地去掉字符串最后一位换行符 */
-void trimmed(char c[])
+/* 去掉字符串两端的空白字符 */
+void trimmed(char * c)
 {
-    if (c[strlen(c) - 1] == '\n')
-        c[strlen(c) - 1] = '\0';
+    char* end = NULL;
+    if (!c)
+        return ;
+    
+    end = c + strlen(c) - 1;
+    
+    while (*c && isspace(*c)) {
+        c++;
+    }
+    while (*end && isspace(*end)) {
+        *end-- = '\0';
+    }
 }
 
 /* 显示所有支持的命令 */
