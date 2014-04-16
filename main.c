@@ -88,7 +88,7 @@ void show_help()
 }
 
 /* 向文件末尾添加结构体信息 */
-int write_to_file(struct Information* info)
+int write_info_to_file(struct Information* info)
 {
     FILE *file;
     file = fopen(file_name, "a");
@@ -107,6 +107,29 @@ int write_to_file(struct Information* info)
     fputs("\n",file);
     
     fclose(file);
+    return 1;
+}
+
+/* 将整个链表重新保存文件 */
+int write_list_to_file(struct Info_list* list_head)
+{
+    struct Info_list * list_iter = list_head;
+    
+    /* 删除文件所有内容 */
+    FILE *file;
+    file = fopen(file_name, "w");
+    if(!file) {
+        printf("\nError!    Cannot Open File %s\n", file_name);
+        return 0;
+    }
+    fclose(file);
+
+    /* 循环保存链表中得每一个结构体到文件 */
+    while (list_iter && list_iter->node) {
+        write_info_to_file(list_iter->node);
+        list_iter = list_iter->next;
+    }
+    
     return 1;
 }
 
@@ -264,7 +287,7 @@ void insert_information(struct Info_list *list_head)
     fgets(info->comment, 400, stdin);
     printf("You Typed %s\n", info->comment);
     trimmed(info->comment);
-    write_to_file(info);
+    write_info_to_file(info);
 }
 
 /* 按插入的日期显示所有数据 */
@@ -407,8 +430,51 @@ void list_information_order(struct Info_list * list_head, const char* which)
     }
     
 }
-void delete_information()
+
+/* 从链表中删除指定ID的记录 */
+void delete_id_in_list(struct Info_list * list_head, long int id)
 {
+    struct Info_list * list_iter = list_head;
+    struct Info_list * list_pre = NULL;
+    struct Information * info = NULL;
+    
+    while (list_iter && list_iter->node) {
+        
+        info = list_iter->node;
+        if (info->id == id) {
+            free(info);
+            list_iter->node = NULL;
+            
+            /* 释放当前内存，指针回退 */
+            if (list_pre) {
+                list_pre->next = list_iter->next;
+                free(list_iter);
+                list_iter = list_pre;
+            } else {
+                /* 当要删除的结点为头结点时，怎么删除？ */
+            }
+        }
+        list_pre = list_iter;
+        list_iter = list_iter->next;
+    }
+    
+}
+
+/* 删除指定的记录 */
+void delete_information(struct Info_list * list_head)
+{
+    char condition[100];
+    char * trimmed_condition = NULL;
+    long int id;
+    printf("Enter ID which you want delete. \n>>>>");
+    fgets(condition, 100, stdin);
+    trimmed_condition = trimmed(condition);
+    id = atol(trimmed_condition);
+    
+    delete_id_in_list(list_head, id);
+    
+    /* 保存 */
+    write_list_to_file(list_head);
 }
 
 
@@ -499,7 +565,7 @@ void search_information(struct Info_list * list_head, enum InfoType type)
 }
 
 
-void modify_information()
+void modify_information(struct Info_list * list_head)
 {
 }
 
@@ -531,9 +597,9 @@ void select_operator(char operator[100], struct Info_list * list_head)
         list_information_order(list_head, "company");
     else if (0 == strcmp(operator, "lcomment"))
         list_information_order(list_head, "comment");
-    /*4.*/
+    /* 删除 */
     else if (0 == strcmp(operator, "d"))
-        delete_information();
+        delete_information(list_head);
     
     /* 查找数据，全文模糊查找或按字段模糊查找*/
     else if (0 == strcmp(operator, "s"))
@@ -555,7 +621,7 @@ void select_operator(char operator[100], struct Info_list * list_head)
     
     /*6.*/
     else if (0 == strcmp(operator, "m"))
-        modify_information();
+        modify_information(list_head);
 }
 
 /* 释放链表申请的内存 */
