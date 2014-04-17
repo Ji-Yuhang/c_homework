@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
+//#include <ctype.h>
 
 const char* file_name = "record.txt";
 
@@ -50,10 +50,10 @@ char* trimmed(char * c)
     
     end = c + strlen(c) - 1;
     
-    while (*c && isspace(*c)) {
+	while (*c && (*c == ' ' || *c == '\t' || *c == '\n')) {
         c++;
     }
-    while (*end && end >= c && isspace(*end)) {
+	while (*end && end >= c && end >= c && (*end == ' ' || *end == '\t' || *end == '\n')) {
         *end-- = '\0';
     }
     return c;
@@ -411,7 +411,7 @@ void list_information_order(struct Info_list * list_head, const char* which)
             }
             sort_iter = sort_iter->next;
         }
-        (sort_min->flag)++;
+//        (sort_min->flag)++;
         
         /* 将找到的最小结点与第一个无序的结点交换位置 */
         swap_temp = sort_min->node;
@@ -590,6 +590,8 @@ void modify_information(struct Info_list * list_head)
         list_iter = list_iter->next;
     }
     info_temp = list_iter->node;
+	if (!info_temp)
+		return;
     printf("\n id: %ld", info_temp->id);
     printf("\t name: %s", info_temp->name);
     printf("\t type: %s", info_temp->type);
@@ -680,6 +682,7 @@ void select_operator(char operator[100], struct Info_list * list_head)
         delete_information(list_head);
     
     /* 查找数据，全文模糊查找或按字段模糊查找*/
+
     else if (0 == strcmp(operator, "s"))
         search_information(list_head , ALL);
     else if (0 ==  strcmp(operator, "sid"))
