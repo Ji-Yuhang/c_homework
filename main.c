@@ -65,7 +65,10 @@ void show_help()
     printf("This is Help Page!\n");
     printf("Type \"q\", Quit \n");
     printf("Type \"i\", Insert Data of Device \n");
-
+    printf("Type \"d\", Delete Data \n");
+    printf("Type \"m\", Modify Data \n");
+    printf("\n");
+    
     printf("Type \"l\", Show All Data, default order by time\n");
     printf("Type \"lid\", Show Data order by Id\n");
     printf("Type \"lname\", Show Data order by Name\n");
@@ -74,6 +77,7 @@ void show_help()
     printf("Type \"lnumber\", Show Data order by Number\n");
     printf("Type \"lcompany\", Show Data order by Company\n");
     printf("Type \"lcomment\", Show Data order by Comment\n");
+    printf("\n");
     
     printf("Type \"s\", Search Data, default support fuzzy search\n");
     printf("Type \"sid\", Search Data by Id\n");
