@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
 const char* file_name = "record.txt";
 
 /* 信息结构体 */
@@ -113,7 +114,7 @@ int write_info_to_file(struct Information* info)
 /* 将整个链表重新保存文件 */
 int write_list_to_file(struct Info_list* list_head)
 {
-    struct Info_list * list_iter = list_head;
+    struct Info_list * list_iter = list_head->next;
     
     /* 删除文件所有内容 */
     FILE *file;
@@ -134,7 +135,7 @@ int write_list_to_file(struct Info_list* list_head)
 }
 
 /* 读取文件所有数据，并保存到链表当中 */
-struct Info_list* read_from_file(struct Info_list* list_head)
+struct Info_list* read_from_file(struct Info_list* list_first)
 {
     FILE *file;
     struct Information *info = NULL;
@@ -149,7 +150,7 @@ struct Info_list* read_from_file(struct Info_list* list_head)
         printf("\nError!    Cannot Open File %s\n", file_name);
         return NULL;
     }
-    list_temp = list_head;
+    list_temp = list_first;
     while ((fgets(str, 400, file))!=NULL)
     {
         if (strlen(str) > 1 )
@@ -168,7 +169,7 @@ struct Info_list* read_from_file(struct Info_list* list_head)
             case 1:
                 list_next = (struct Info_list*)malloc(sizeof(struct Info_list));
                 info = (struct Information*)malloc(sizeof(struct Information));
-                if (NULL == info || NULL == list_head) {
+                if (NULL == info || NULL == list_first) {
                     printf("\nError!    Cannot malloc memory\n");
                     return NULL;
                 }
@@ -208,7 +209,7 @@ struct Info_list* read_from_file(struct Info_list* list_head)
     }
     
     fclose(file);
-    return list_head;
+    return list_first;
 }
 
 /* 执行插入数据命令 */
@@ -220,7 +221,7 @@ void insert_information(struct Info_list *list_head)
     struct Information *info = NULL;
     struct Info_list* list_next = NULL;
     struct Info_list* list_temp = NULL;
-    
+/*
     if (!list_head) {
         list_head = (struct Info_list*)malloc(sizeof(struct Info_list));
         if (NULL == list_head) {
@@ -230,7 +231,8 @@ void insert_information(struct Info_list *list_head)
         list_head->next = NULL;
         list_head->node = NULL;
     }
-    list_temp = list_head;
+*/
+    list_temp = list_head->next;
     while (list_temp != NULL && list_temp->node != NULL)
         list_temp = list_temp->next;
     
@@ -247,43 +249,43 @@ void insert_information(struct Info_list *list_head)
     printf("\nNow Insert a New Data of Devcie.\n");
     
     printf("Plase Enter ID, only numeral support, for example: \"123456\"\n");
-    printf(">>>>");
+    printf(">>>> ");
     fgets(id_char, 200, stdin);
     info->id = atol(id_char);
     printf("You Typed %ld\n", info->id);
     
     printf("Plase Enter Name, for example: \"Kobe Bryant\"\n");
-    printf(">>>>");
+    printf(">>>> ");
     fgets(info->name, 200, stdin);
     trimmed(info->name);
     printf("You Typed %s\n", info->name);
     
     printf("Plase Enter Type, for example: \"A\"\n");
-    printf(">>>>");
+    printf(">>>> ");
     fgets(info->type, 200, stdin);
     trimmed(info->type);
     printf("You Typed %s\n", info->type);
     
     printf("Plase Enter Price, only numeral support, example: \"123.456\"\n");
-    printf(">>>>");
+    printf(">>>> ");
     fgets(price_char, 200, stdin);
     info->price = atof(price_char);
     printf("You Typed %f\n", info->price);
     
     printf("Plase Enter Number, only numeral support, example: \"543210\"\n");
-    printf(">>>>");
+    printf(">>>> ");
     fgets(number_char, 200, stdin);
     info->number = atoi(number_char);
     printf("You Typed %u\n", info->number);
     
     printf("Plase Enter Company, for example: \"Red Had\"\n");
-    printf(">>>>");
+    printf(">>>> ");
     fgets(info->company, 200, stdin);
     trimmed(info->company);
     printf("You Typed %s\n", info->company);
     
     printf("Plase Enter Comment, for example: \"This is Comment\"\n");
-    printf(">>>>");
+    printf(">>>> ");
     fgets(info->comment, 400, stdin);
     printf("You Typed %s\n", info->comment);
     trimmed(info->comment);
@@ -293,7 +295,7 @@ void insert_information(struct Info_list *list_head)
 /* 按插入的日期显示所有数据 */
 void list_information(struct Info_list * list_head)
 {
-    struct Info_list *list_temp = list_head;
+    struct Info_list *list_temp = list_head->next;
     struct Information *temp = NULL;
     while (list_temp != NULL && list_temp->node != NULL) {
         temp = list_temp->node;
@@ -312,7 +314,7 @@ void list_information(struct Info_list * list_head)
 /* 按相应的排序方法显示数据 */
 void list_information_order(struct Info_list * list_head, const char* which)
 {
-    struct Info_list * list_temp = list_head;
+    struct Info_list * list_temp = list_head->next;
     struct Info_list * swap_temp = NULL;
     struct SortHelp
     {
@@ -434,8 +436,8 @@ void list_information_order(struct Info_list * list_head, const char* which)
 /* 从链表中删除指定ID的记录 */
 void delete_id_in_list(struct Info_list * list_head, long int id)
 {
-    struct Info_list * list_iter = list_head;
-    struct Info_list * list_pre = NULL;
+    struct Info_list * list_iter = list_head->next;
+    struct Info_list * list_pre = list_head;
     struct Information * info = NULL;
     
     while (list_iter && list_iter->node) {
@@ -446,13 +448,9 @@ void delete_id_in_list(struct Info_list * list_head, long int id)
             list_iter->node = NULL;
             
             /* 释放当前内存，指针回退 */
-            if (list_pre) {
-                list_pre->next = list_iter->next;
-                free(list_iter);
-                list_iter = list_pre;
-            } else {
-                /* 当要删除的结点为头结点时，怎么删除？ */
-            }
+            list_pre->next = list_iter->next;
+            free(list_iter);
+            list_iter = list_pre;
         }
         list_pre = list_iter;
         list_iter = list_iter->next;
@@ -466,7 +464,7 @@ void delete_information(struct Info_list * list_head)
     char condition[100];
     char * trimmed_condition = NULL;
     long int id;
-    printf("Enter ID which you want delete. \n>>>>");
+    printf("Enter ID which you want delete. \n>>>> ");
     fgets(condition, 100, stdin);
     trimmed_condition = trimmed(condition);
     id = atol(trimmed_condition);
@@ -485,7 +483,7 @@ void search_information(struct Info_list * list_head, enum InfoType type)
         HAVE = 1,
         UNHAVE = 2
     };
-    struct Info_list * list_iter = list_head;
+    struct Info_list * list_iter = list_head->next;
     char condition[100];
     char char_id[100];
     char char_price[100];
@@ -494,9 +492,9 @@ void search_information(struct Info_list * list_head, enum InfoType type)
     struct Information * info = NULL;
     enum HaveInfo is_have = UNHAVE;
     if (ALL == type) {
-        printf("Enter your condition below. (support fuzzy search) \n>>>>");
+        printf("Enter your condition below. (support fuzzy search) \n>>>> ");
     } else
-        printf("Enter your condition below. \n>>>>");
+        printf("Enter your condition below. \n>>>> ");
     fgets(condition, 100, stdin);
     trimmed_condition = trimmed(condition);
     while (list_iter && list_iter->node) {
@@ -567,6 +565,82 @@ void search_information(struct Info_list * list_head, enum InfoType type)
 
 void modify_information(struct Info_list * list_head)
 {
+    struct Info_list * list_iter = list_head->next;
+    char condition[100];
+    char * trimmed_condition = NULL;
+    long int id;
+    struct Information * info_temp = NULL;
+    struct Information * info = NULL;
+    char id_char[200];
+    char price_char[200];
+    char number_char[200];
+    
+    printf("Enter ID which you want modify. \n>>>> ");
+    fgets(condition, 100, stdin);
+    trimmed_condition = trimmed(condition);
+    id = atol(trimmed_condition);
+    
+    while (list_iter && list_iter->node) {
+        if (list_iter->node->id == id)
+            break;
+        list_iter = list_iter->next;
+    }
+    info_temp = list_iter->node;
+    printf("\n id: %ld", info_temp->id);
+    printf("\t name: %s", info_temp->name);
+    printf("\t type: %s", info_temp->type);
+    printf("\t price: %.2f", info_temp->price);
+    printf("\t Number: %u", info_temp->number);
+    printf("\n  Company: %s", info_temp->company);
+    printf("  Comment: %s\n", info_temp->comment);
+    
+    info = info_temp;
+    printf("\nNow Enter New Data of This Information.\n");
+    printf("Plase Enter ID, only numeral support, for example: \"123456\"\n");
+    printf(">>>> ");
+    fgets(id_char, 200, stdin);
+    info->id = atol(id_char);
+    printf("You Typed %ld\n", info->id);
+    
+    printf("Plase Enter Name, for example: \"Kobe Bryant\"\n");
+    printf(">>>> ");
+    fgets(info->name, 200, stdin);
+    trimmed(info->name);
+    printf("You Typed %s\n", info->name);
+    
+    printf("Plase Enter Type, for example: \"A\"\n");
+    printf(">>>> ");
+    fgets(info->type, 200, stdin);
+    trimmed(info->type);
+    printf("You Typed %s\n", info->type);
+    
+    printf("Plase Enter Price, only numeral support, example: \"123.456\"\n");
+    printf(">>>> ");
+    fgets(price_char, 200, stdin);
+    info->price = atof(price_char);
+    printf("You Typed %f\n", info->price);
+    
+    printf("Plase Enter Number, only numeral support, example: \"543210\"\n");
+    printf(">>>> ");
+    fgets(number_char, 200, stdin);
+    info->number = atoi(number_char);
+    printf("You Typed %u\n", info->number);
+    
+    printf("Plase Enter Company, for example: \"Red Had\"\n");
+    printf(">>>> ");
+    fgets(info->company, 200, stdin);
+    trimmed(info->company);
+    printf("You Typed %s\n", info->company);
+    
+    printf("Plase Enter Comment, for example: \"This is Comment\"\n");
+    printf(">>>> ");
+    fgets(info->comment, 400, stdin);
+    printf("You Typed %s\n", info->comment);
+    trimmed(info->comment);
+
+    /* 保存 */
+    write_list_to_file(list_head);
+
 }
 
 /* 分配命令，并执行 */
@@ -619,7 +693,7 @@ void select_operator(char operator[100], struct Info_list * list_head)
     else if (0 ==  strcmp(operator, "scomment"))
         search_information(list_head, COMMENT);
     
-    /*6.*/
+    /* 修改 */
     else if (0 == strcmp(operator, "m"))
         modify_information(list_head);
 }
@@ -647,6 +721,7 @@ int main(int argc, char** argv)
 {
     char operator[100];
     char * trimmed_operator = NULL;
+    struct Info_list * list_first = NULL;
     /* 给链表的头结点分配内存，并初始化数据为NULL*/
     struct Info_list * list_head = (struct Info_list*)malloc(sizeof(struct Info_list));
     if (NULL == list_head) {
@@ -656,8 +731,17 @@ int main(int argc, char** argv)
     list_head->next = NULL;
     list_head->node = NULL;
     
+    /* 给链表的第一个结点分配内存，并初始化数据为NULL*/
+    list_first = (struct Info_list*)malloc(sizeof(struct Info_list));
+    if (NULL == list_first) {
+        printf("\nError!    Cannot malloc memory\n");
+        return 0;
+    }
+    list_first->next = NULL;
+    list_first->node = NULL;
+    list_head->next = list_first;
     /* 从保存的文件读取数据，并将数据保存到链表当中 */
-    read_from_file(list_head);
+    read_from_file(list_first);
     
     /* 循环执行用户输入的指令，直到输入退出指令 "q" */
     do{
@@ -665,7 +749,7 @@ int main(int argc, char** argv)
         printf("Plese Select Your Operator!    ");
         printf("Type \"help\", for More Information.\n");
         printf("------------------------------------------------------------------------\n");
-        printf(">>>>");
+        printf(">>>> ");
         fgets(operator, 100, stdin);
         trimmed_operator = trimmed(operator);
         select_operator(trimmed_operator, list_head);
