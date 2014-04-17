@@ -354,7 +354,7 @@ void list_information_order(struct Info_list * list_head, const char* which)
             return ;
         }
         sort_one->node = list_temp;
-        sort_one->flag = 0;    /* 0 meaning nothing*/
+        sort_one->flag = 0;    /* 0 meaning nothing */
         sort_one->next = NULL;
         
         if (NULL == sort_head) {
@@ -729,7 +729,7 @@ int main(int argc, char** argv)
     char operator[100];
     char * trimmed_operator = NULL;
     struct Info_list * list_first = NULL;
-    /* 给链表的头结点分配内存，并初始化数据为NULL*/
+    /* 给链表的头结点分配内存，并初始化数据为NULL */
     struct Info_list * list_head = (struct Info_list*)malloc(sizeof(struct Info_list));
     if (NULL == list_head) {
         printf("\nError!    Cannot malloc memory\n");
@@ -738,7 +738,7 @@ int main(int argc, char** argv)
     list_head->next = NULL;
     list_head->node = NULL;
     
-    /* 给链表的第一个结点分配内存，并初始化数据为NULL*/
+    /* 给链表的第一个结点分配内存，并初始化数据为NULL */
     list_first = (struct Info_list*)malloc(sizeof(struct Info_list));
     if (NULL == list_first) {
         printf("\nError!    Cannot malloc memory\n");
