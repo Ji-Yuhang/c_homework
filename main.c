@@ -681,7 +681,7 @@ void select_operator(char operator[100], struct Info_list * list_head)
     else if (0 == strcmp(operator, "d"))
         delete_information(list_head);
     
-    /* 查找数据，全文模糊查找或按字段模糊查找*/
+    /* 查找数据，全文模糊查找或按字段模糊查找 */
 
     else if (0 == strcmp(operator, "s"))
         search_information(list_head , ALL);
