@@ -1,4 +1,4 @@
-﻿c_homework
+c_homework
 ==========
 ![Mou icon](http://mouapp.com/Mou_128.png)
 #实验设备管理系统
@@ -79,3 +79,4 @@ struct Info_list {
     scompany 按公司模糊查找
     scomment 按注释模糊查找
     
+
